@@ -165,12 +165,8 @@ The database (`library.db`) and all sample data are created automatically on fir
 
 ---
 
-## 🔐 Demo Credentials
 
-| Role | Username | Password |
-|------|----------|----------|
-| Admin | `admin` | `admin123` |
-| Student | `student` | `student123` |
+
 
 > ⚠️ These are demo credentials for educational use. Change them before any real deployment.
 
