@@ -1,0 +1,85 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Issued Books — LibraryMS{% endblock %}
+{% block page_title %}Issued Books{% endblock %}
+
+{% block content %}
+<div class="page-title-block">
+  <h4><i class="fas fa-book-reader text-gold me-2"></i>Issued Books</h4>
+  <p>All book transactions with current status.</p>
+</div>
+
+<!-- Filter Tabs -->
+<div class="d-flex gap-2 mb-4 flex-wrap">
+  <a href="{{ url_for('admin_issued') }}" class="btn {% if not status_filter %}btn-navy{% else %}btn-outline-navy{% endif %}">All</a>
+  <a href="{{ url_for('admin_issued', status='Issued') }}" class="btn {% if status_filter=='Issued' %}btn-navy{% else %}btn-outline-navy{% endif %}">Active Issues</a>
+  <a href="{{ url_for('admin_issued', status='Returned') }}" class="btn {% if status_filter=='Returned' %}btn-navy{% else %}btn-outline-navy{% endif %}">Returned</a>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <h5>Transactions ({{ issues|length }})</h5>
+  </div>
+  <div class="admin-card-body p-0">
+    {% if issues %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Book</th>
+            <th>Issue Date</th>
+            <th>Due Date</th>
+            <th>Return Date</th>
+            <th>Status</th>
+            <th>Fine</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in issues %}
+          {% set is_overdue = i['status'] == 'Issued' and i['due_date'] < today %}
+          <tr {% if is_overdue %}class="overdue-row"{% endif %}>
+            <td>
+              <div class="fw-semibold text-navy" style="font-size:.88rem;">{{ i['full_name'] }}</div>
+              <div style="font-size:.75rem;color:var(--muted);">@{{ i['username'] }}</div>
+            </td>
+            <td style="font-size:.85rem;">{{ i['book_title'] }}</td>
+            <td style="font-size:.82rem;">{{ i['issue_date'] }}</td>
+            <td style="font-size:.82rem;" data-due-date="{{ i['due_date'] }}">
+              {{ i['due_date'] }}
+              {% if is_overdue %}<br><span class="availability-badge badge-unavailable" style="font-size:.62rem;">OVERDUE</span>{% endif %}
+            </td>
+            <td style="font-size:.82rem;">{{ i['return_date'] or '—' }}</td>
+            <td>
+              {% if i['status'] == 'Issued' %}
+              <span class="badge rounded-pill" style="background:var(--navy);padding:4px 10px;font-size:.72rem;">Issued</span>
+              {% else %}
+              <span class="availability-badge badge-available" style="font-size:.72rem;">Returned</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if i['status'] == 'Issued' %}
+                {% set fine = calculate_fine(i['due_date']) %}
+                {% if fine > 0 %}
+                <span class="text-danger fw-semibold">₹{{ fine }}</span>
+                {% else %}
+                <span class="text-success">₹0</span>
+                {% endif %}
+              {% else %}
+                {% if i['fine'] > 0 %}
+                <span class="text-danger">₹{{ i['fine'] }}</span>
+                {% else %}
+                <span class="text-success">₹0</span>
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><i class="fas fa-book-reader"></i><h5>No records found.</h5></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

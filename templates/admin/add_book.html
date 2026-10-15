@@ -1,0 +1,80 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Add Book — LibraryMS{% endblock %}
+{% block page_title %}Add Book{% endblock %}
+
+{% block content %}
+<div class="page-title-block d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <div>
+    <h4><i class="fas fa-plus-circle text-gold me-2"></i>Add New Book</h4>
+    <p>Fill in the details to add a new book to the collection.</p>
+  </div>
+  <a href="{{ url_for('admin_books') }}" class="btn btn-outline-navy"><i class="fas fa-arrow-left me-2"></i>Back</a>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-body">
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('admin_add_book') }}" class="cover-search-form">
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label">Title <span class="text-danger">*</span></label>
+          <input type="text" name="title" class="form-control" value="{{ form.get('title','') }}" placeholder="Book title" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Category <span class="text-danger">*</span></label>
+          <input type="text" name="category" class="form-control" value="{{ form.get('category','') }}" placeholder="e.g. Python" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Author <span class="text-danger">*</span></label>
+          <input type="text" name="author" class="form-control" value="{{ form.get('author','') }}" placeholder="Author name" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">ISBN</label>
+          <input type="text" name="isbn" class="form-control" value="{{ form.get('isbn','') }}" placeholder="978-X-XXXX-XXXX-X">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Publisher</label>
+          <input type="text" name="publisher" class="form-control" value="{{ form.get('publisher','') }}" placeholder="Publisher name">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Publication Year</label>
+          <input type="number" name="publication_year" class="form-control" value="{{ form.get('publication_year','') }}" placeholder="2023" min="1800" max="2099">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Quantity <span class="text-danger">*</span></label>
+          <input type="number" name="quantity" class="form-control" value="{{ form.get('quantity','1') }}" placeholder="1" min="1" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Shelf / Location</label>
+          <input type="text" name="shelf" class="form-control" value="{{ form.get('shelf','') }}" placeholder="e.g. A-1">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Book front cover</label>
+          <input type="hidden" name="remove_cover" class="remove-cover-value" value="0">
+          <input type="hidden" name="cover_image" class="cover-image-value" value="{{ form.get('cover_image','') }}">
+          <div class="cover-editor d-flex flex-column flex-md-row align-items-start gap-3">
+            <div class="cover-preview-frame"><img class="cover-editor-preview" alt="Selected book cover preview" hidden></div>
+            <div class="flex-grow-1 w-100">
+              <label class="form-label" for="cover_file">Upload the exact book cover</label>
+              <input type="file" id="cover_file" name="cover_file" class="form-control cover-file-input" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+              <div class="form-text">JPG, PNG, or WEBP; maximum 5 MB. An uploaded cover takes priority over an online result.</div>
+              <div class="d-flex flex-wrap gap-2 mt-2">
+                <button type="button" class="btn btn-outline-navy find-book-cover"><i class="fas fa-search me-2"></i>Find matching cover</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary clear-book-cover">Clear selected cover</button>
+              </div>
+              <div class="cover-search-status small mt-2" role="status" aria-live="polite">Enter the title and author above, then search for a matching edition.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Description</label>
+          <textarea name="description" class="form-control" rows="3" placeholder="Brief description of the book…">{{ form.get('description','') }}</textarea>
+        </div>
+        <div class="col-12 d-flex gap-2 pt-2">
+          <button type="submit" class="btn btn-gold"><i class="fas fa-save me-2"></i>Add Book</button>
+          <a href="{{ url_for('admin_books') }}" class="btn btn-outline-navy">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

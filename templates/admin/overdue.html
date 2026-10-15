@@ -1,0 +1,62 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Overdue Books — LibraryMS{% endblock %}
+{% block page_title %}Overdue Books{% endblock %}
+
+{% block content %}
+<div class="page-title-block">
+  <h4><i class="fas fa-exclamation-triangle text-gold me-2"></i>Overdue Books</h4>
+  <p>Books not returned past their due date.</p>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <h5>Overdue Records ({{ overdues|length }})</h5>
+  </div>
+  <div class="admin-card-body p-0">
+    {% if overdues %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Book</th>
+            <th>Issue Date</th>
+            <th>Due Date</th>
+            <th>Days Overdue</th>
+            <th>Current Fine</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in overdues %}
+          {% set fine_amt = calculate_fine(o['due_date']) %}
+          {% set days_late = (fine_amt / 5) | int %}
+          <tr class="overdue-row">
+            <td>
+              <div class="fw-semibold text-navy" style="font-size:.88rem;">{{ o['full_name'] }}</div>
+              <div style="font-size:.75rem;color:var(--muted);">@{{ o['username'] }}</div>
+            </td>
+            <td style="font-size:.85rem;">{{ o['book_title'] }}</td>
+            <td style="font-size:.82rem;">{{ o['issue_date'] }}</td>
+            <td style="font-size:.82rem;color:#dc2626;font-weight:600;">{{ o['due_date'] }}</td>
+            <td>
+              <span class="availability-badge badge-unavailable">{{ days_late }} day{% if days_late != 1 %}s{% endif %}</span>
+            </td>
+            <td>
+              <span class="text-danger fw-bold">₹{{ fine_amt }}</span>
+              <div style="font-size:.72rem;color:var(--muted);">₹5 × {{ days_late }} days</div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-check-circle" style="color:#d1d5db;"></i>
+      <h5>No Overdue Books</h5>
+      <p>All borrowed books are within their due dates.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

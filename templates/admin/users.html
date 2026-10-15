@@ -1,0 +1,77 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Users — LibraryMS{% endblock %}
+{% block page_title %}Users{% endblock %}
+
+{% block content %}
+<div class="page-title-block">
+  <h4><i class="fas fa-users text-gold me-2"></i>User Management</h4>
+  <p>View and manage registered students.</p>
+</div>
+
+<div class="admin-card mb-4">
+  <div class="admin-card-body">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-md-8">
+        <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Search by name, username or email…">
+      </div>
+      <div class="col-md-4">
+        <button type="submit" class="btn btn-navy w-100"><i class="fas fa-search me-2"></i>Search</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <h5>Registered Students ({{ users|length }})</h5>
+  </div>
+  <div class="admin-card-body p-0">
+    {% if users %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Registered</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td class="text-muted" style="font-size:.78rem;">{{ u['id'] }}</td>
+            <td class="fw-semibold text-navy" style="font-size:.9rem;">{{ u['full_name'] }}</td>
+            <td style="font-size:.85rem;">@{{ u['username'] }}</td>
+            <td style="font-size:.82rem;">{{ u['email'] }}</td>
+            <td style="font-size:.82rem;">{{ u['phone'] or '—' }}</td>
+            <td style="font-size:.8rem;">{{ u['registration_date'][:10] if u['registration_date'] else '—' }}</td>
+            <td>
+              {% if u['status'] == 'Active' %}
+              <span class="availability-badge badge-available">Active</span>
+              {% else %}
+              <span class="availability-badge badge-unavailable">Inactive</span>
+              {% endif %}
+            </td>
+            <td>
+              <form action="{{ url_for('admin_toggle_user', user_id=u['id']) }}" method="POST" class="d-inline">
+                <button type="submit" class="btn btn-sm {% if u['status'] == 'Active' %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                  {% if u['status'] == 'Active' %}<i class="fas fa-ban me-1"></i>Deactivate{% else %}<i class="fas fa-check me-1"></i>Activate{% endif %}
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><i class="fas fa-users"></i><h5>No users found.</h5></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

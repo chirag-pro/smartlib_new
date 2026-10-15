@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — LibraryMS{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="dashboard-header">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <h2><i class="fas fa-tachometer-alt text-gold me-2"></i>My Dashboard</h2>
+        <p>Welcome back, <strong>{{ current_user.full_name }}</strong>! Here's your library overview.</p>
+      </div>
+      <a href="{{ url_for('books') }}" class="btn btn-gold"><i class="fas fa-book me-2"></i>Browse Books</a>
+    </div>
+  </div>
+</div>
+
+<div style="background:#f3f4f6;min-height:calc(100vh - 200px);padding:32px 0;">
+  <div class="container">
+
+    <!-- Stats Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon" style="background:#eef2ff;"><i class="fas fa-book-reader" style="color:var(--navy);"></i></div>
+          <div>
+            <div class="dash-stat-num">{{ stats.active }}</div>
+            <div class="dash-stat-label">Currently Borrowed</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon" style="background:#d1fae5;"><i class="fas fa-undo-alt" style="color:#059669;"></i></div>
+          <div>
+            <div class="dash-stat-num">{{ stats.returned }}</div>
+            <div class="dash-stat-label">Returned Books</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon" style="background:#fef3c7;"><i class="fas fa-exclamation-triangle" style="color:#d97706;"></i></div>
+          <div>
+            <div class="dash-stat-num">{{ stats.overdue }}</div>
+            <div class="dash-stat-label">Overdue Books</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon" style="background:#fee2e2;"><i class="fas fa-rupee-sign" style="color:#dc2626;"></i></div>
+          <div>
+            <div class="dash-stat-num">₹{{ stats.fine }}</div>
+            <div class="dash-stat-label">Total Fine</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Currently Borrowed -->
+    <div class="admin-card mb-4">
+      <div class="admin-card-header">
+        <h5><i class="fas fa-book-open text-gold me-2"></i>Currently Borrowed Books</h5>
+        <a href="{{ url_for('my_books') }}" class="btn btn-sm btn-navy">View All</a>
+      </div>
+      <div class="admin-card-body p-0">
+        {% if issued %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Book</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Fine</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for b in issued %}
+              {% set fine_amt = calculate_fine(b['due_date']) %}
+              <tr {% if b['due_date'] < today %}class="overdue-row"{% endif %}>
+                <td>
+                  <div class="fw-semibold text-navy" style="font-size:.9rem;">{{ b['title'] }}</div>
+                  <div style="font-size:.77rem;color:var(--muted);">{{ b['author'] }}</div>
+                </td>
+                <td data-due-date="{{ b['due_date'] }}">{{ b['issue_date'] }}</td>
+                <td>
+                  {{ b['due_date'] }}
+                  {% if b['due_date'] < today %}
+                  <span class="availability-badge badge-unavailable ms-1" style="font-size:.65rem;">OVERDUE</span>
+                  {% endif %}
+                </td>
+                <td><span class="badge" style="background:var(--navy);color:#fff;border-radius:50px;padding:4px 10px;font-size:.72rem;">{{ b['status'] }}</span></td>
+                <td>
+                  {% if fine_amt > 0 %}
+                  <span class="text-danger fw-semibold">₹{{ fine_amt }}</span>
+                  {% else %}
+                  <span class="text-success">₹0</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <form action="{{ url_for('return_book_route', issue_id=b['id']) }}" method="POST" class="confirm-return d-inline">
+                    <button type="submit" class="btn btn-sm btn-gold">Return</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:40px;">
+          <i class="fas fa-book" style="font-size:2.5rem;color:#d1d5db;"></i>
+          <p class="mt-2 mb-0">No books currently borrowed.</p>
+          <a href="{{ url_for('books') }}" class="btn btn-sm btn-navy mt-3">Browse Books</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Recent History -->
+    {% if returned %}
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <h5><i class="fas fa-history text-gold me-2"></i>Recent Borrowing History</h5>
+      </div>
+      <div class="admin-card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr><th>Book</th><th>Issue Date</th><th>Return Date</th><th>Fine Paid</th></tr>
+            </thead>
+            <tbody>
+              {% for b in returned %}
+              <tr>
+                <td>
+                  <div class="fw-semibold text-navy" style="font-size:.9rem;">{{ b['title'] }}</div>
+                  <div style="font-size:.77rem;color:var(--muted);">{{ b['author'] }}</div>
+                </td>
+                <td>{{ b['issue_date'] }}</td>
+                <td>{{ b['return_date'] }}</td>
+                <td>
+                  {% if b['fine'] > 0 %}
+                  <span class="text-danger">₹{{ b['fine'] }}</span>
+                  {% else %}
+                  <span class="text-success">₹0</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

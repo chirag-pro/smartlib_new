@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}{{ book['title'] }} — LibraryMS{% endblock %}
+
+{% block content %}
+<div style="background:var(--cream);padding:20px 0;">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-gold">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('books') }}" class="text-gold">Books</a></li>
+        <li class="breadcrumb-item active" style="color:var(--navy);">{{ book['title'][:40] }}{% if book['title']|length > 40 %}…{% endif %}</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<section style="padding:56px 0;">
+  <div class="container">
+    <div class="row g-5">
+      <!-- Cover -->
+      <div class="col-lg-3 col-md-4 text-center">
+        <img class="book-cover-auto mx-auto d-block"
+          data-title="{{ book['title'] }}"
+          data-author="{{ book['author'] }}"
+          data-isbn="{{ book['isbn'] or '' }}"
+          data-cover="{{ book['cover_image'] or '' }}"
+          data-detail="true"
+          src=""
+          alt="{{ book['title'] }}"
+          style="display:none;width:100%;max-width:220px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);">
+        <div class="book-detail-cover-placeholder mx-auto">
+          <i class="fas fa-book"></i>
+          <div style="color:rgba(255,255,255,.7);font-size:.8rem;margin-top:12px;padding:0 16px;line-height:1.4;">
+            {{ book['title'] }}
+          </div>
+        </div>
+        <div class="mt-3">
+          {% if book['available_quantity'] > 0 %}
+          <span class="availability-badge badge-available fs-6 px-3 py-2"><i class="fas fa-check me-2"></i>Available</span>
+          {% else %}
+          <span class="availability-badge badge-unavailable fs-6 px-3 py-2"><i class="fas fa-times me-2"></i>Unavailable</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Details -->
+      <div class="col-lg-6 col-md-8">
+        <span class="book-category-badge fs-6 mb-2">{{ book['category'] }}</span>
+        <h2 class="section-title mt-1" style="font-size:2rem;">{{ book['title'] }}</h2>
+        <p style="font-size:1.1rem;color:var(--muted);"><i class="fas fa-user me-2 text-gold"></i>{{ book['author'] }}</p>
+
+        {% if book['description'] %}
+        <p style="line-height:1.8;color:#374151;margin-bottom:24px;">{{ book['description'] }}</p>
+        {% endif %}
+
+        <div class="row g-2 mb-3">
+          <div class="col-12"><div class="book-meta-item"><strong><i class="fas fa-barcode me-2 text-gold"></i>ISBN</strong>{{ book['isbn'] or 'N/A' }}</div></div>
+          <div class="col-12"><div class="book-meta-item"><strong><i class="fas fa-building me-2 text-gold"></i>Publisher</strong>{{ book['publisher'] or 'N/A' }}</div></div>
+          <div class="col-12"><div class="book-meta-item"><strong><i class="fas fa-calendar me-2 text-gold"></i>Published</strong>{{ book['publication_year'] or 'N/A' }}</div></div>
+          <div class="col-12"><div class="book-meta-item"><strong><i class="fas fa-archive me-2 text-gold"></i>Shelf</strong>{{ book['shelf'] or 'N/A' }}</div></div>
+          <div class="col-12"><div class="book-meta-item"><strong><i class="fas fa-layer-group me-2 text-gold"></i>Total Copies</strong>{{ book['quantity'] }}</div></div>
+          <div class="col-12"><div class="book-meta-item"><strong><i class="fas fa-check-circle me-2 text-gold"></i>Available</strong>{{ book['available_quantity'] }} / {{ book['quantity'] }}</div></div>
+        </div>
+
+        <!-- Borrow Section -->
+        <div class="mt-4 p-4" style="background:var(--cream);border-radius:var(--radius);border-left:4px solid var(--gold);">
+          {% if current_user and current_user.role == 'student' %}
+            {% if already_borrowed %}
+            <p class="text-muted mb-2"><i class="fas fa-info-circle text-gold me-2"></i>You have already borrowed this book.</p>
+            <a href="{{ url_for('my_books') }}" class="btn btn-outline-secondary">View My Books</a>
+            {% elif book['available_quantity'] > 0 %}
+            <p class="fw-semibold mb-2" style="color:var(--navy);"><i class="fas fa-hand-holding-heart text-gold me-2"></i>Ready to borrow?</p>
+            <p class="text-muted small mb-3">Borrow period: 14 days &bull; Fine for late return: ₹5/day</p>
+            <form action="{{ url_for('borrow_book', book_id=book['id']) }}" method="POST">
+              <button type="submit" class="btn btn-gold" onclick="return confirm('Borrow \'{{ book['title'] }}\' for 14 days?')">
+                <i class="fas fa-book me-2"></i>Borrow This Book
+              </button>
+            </form>
+            {% else %}
+            <p class="text-muted mb-2"><i class="fas fa-times-circle text-danger me-2"></i>This book is currently unavailable.</p>
+            <button class="btn btn-secondary" disabled>Currently Unavailable</button>
+            {% endif %}
+          {% elif current_user and current_user.role == 'admin' %}
+          <p class="text-muted mb-0"><i class="fas fa-shield-alt text-gold me-2"></i>Admin accounts cannot borrow books.</p>
+          {% else %}
+          <p class="mb-2" style="color:var(--navy);font-weight:600;"><i class="fas fa-lock text-gold me-2"></i>Want to borrow this book?</p>
+          <p class="text-muted small mb-3">Please login to borrow books from our collection.</p>
+          <a href="{{ url_for('login') }}" class="btn btn-navy me-2"><i class="fas fa-sign-in-alt me-2"></i>Login</a>
+          <a href="{{ url_for('register') }}" class="btn-outline-navy btn">Register</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <div class="admin-card">
+          <div class="admin-card-header"><h5><i class="fas fa-info me-2 text-gold"></i>Book Info</h5></div>
+          <div class="admin-card-body">
+            <div style="font-size:.88rem;line-height:2;">
+              <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                <span class="text-muted">Category</span>
+                <span class="fw-semibold text-navy">{{ book['category'] }}</span>
+              </div>
+              <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                <span class="text-muted">Year</span>
+                <span class="fw-semibold">{{ book['publication_year'] or '—' }}</span>
+              </div>
+              <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                <span class="text-muted">Copies</span>
+                <span class="fw-semibold">{{ book['quantity'] }}</span>
+              </div>
+              <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                <span class="text-muted">Available</span>
+                <span class="fw-semibold {% if book['available_quantity'] > 0 %}text-success{% else %}text-danger{% endif %}">{{ book['available_quantity'] }}</span>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">Shelf</span>
+                <span class="fw-semibold">{{ book['shelf'] or '—' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <a href="{{ url_for('books') }}" class="btn btn-outline-navy w-100 mt-2">
+          <i class="fas fa-arrow-left me-2"></i>Back to Books
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

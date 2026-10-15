@@ -1,0 +1,102 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Manage Books — LibraryMS{% endblock %}
+{% block page_title %}Books{% endblock %}
+
+{% block content %}
+<div class="page-title-block d-flex justify-content-between align-items-center flex-wrap gap-3">
+  <div>
+    <h4><i class="fas fa-book text-gold me-2"></i>Book Management</h4>
+    <p>Add, edit, or remove books from the collection.</p>
+  </div>
+  <a href="{{ url_for('admin_add_book') }}" class="btn btn-gold"><i class="fas fa-plus me-2"></i>Add New Book</a>
+</div>
+
+<!-- Search/Filter -->
+<div class="admin-card mb-4">
+  <div class="admin-card-body">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Search by title or author…">
+      </div>
+      <div class="col-md-4">
+        <select name="category" class="form-select">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+          <option value="{{ cat }}" {% if cat == category %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-navy w-100"><i class="fas fa-search me-2"></i>Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <h5>All Books ({{ books|length }})</h5>
+  </div>
+  <div class="admin-card-body p-0">
+    {% if books %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Title / Author</th>
+            <th>Category</th>
+            <th>ISBN</th>
+            <th>Year</th>
+            <th>Shelf</th>
+            <th>Total</th>
+            <th>Available</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for book in books %}
+          <tr>
+            <td class="text-muted" style="font-size:.78rem;">{{ book['id'] }}</td>
+            <td>
+              <div class="fw-semibold text-navy" style="font-size:.9rem;">{{ book['title'] }}</div>
+              <div style="font-size:.77rem;color:var(--muted);">{{ book['author'] }}</div>
+            </td>
+            <td><span class="book-category-badge">{{ book['category'] }}</span></td>
+            <td style="font-size:.8rem;">{{ book['isbn'] or '—' }}</td>
+            <td style="font-size:.82rem;">{{ book['publication_year'] or '—' }}</td>
+            <td style="font-size:.82rem;">{{ book['shelf'] or '—' }}</td>
+            <td class="text-center fw-semibold">{{ book['quantity'] }}</td>
+            <td class="text-center fw-semibold {% if book['available_quantity'] > 0 %}text-success{% else %}text-danger{% endif %}">{{ book['available_quantity'] }}</td>
+            <td>
+              {% if book['available_quantity'] > 0 %}
+              <span class="availability-badge badge-available">Available</span>
+              {% else %}
+              <span class="availability-badge badge-unavailable">Unavail.</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="d-flex gap-1">
+                <a href="{{ url_for('book_details', book_id=book['id']) }}" class="btn btn-sm btn-outline-secondary" title="View" target="_blank"><i class="fas fa-eye"></i></a>
+                <a href="{{ url_for('admin_edit_book', book_id=book['id']) }}" class="btn btn-sm btn-navy" title="Edit"><i class="fas fa-edit"></i></a>
+                <form action="{{ url_for('admin_delete_book', book_id=book['id']) }}" method="POST" class="confirm-delete d-inline">
+                  <button type="submit" class="btn btn-sm btn-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-book"></i>
+      <h5>No Books Found</h5>
+      <p>No books match your search criteria.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

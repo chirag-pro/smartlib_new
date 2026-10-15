@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Contact — LibraryMS{% endblock %}
+{% block content %}
+<div style="background:linear-gradient(135deg,var(--navy),var(--navy-light));padding:64px 0 48px;">
+  <div class="container text-center">
+    <h1 style="color:#fff;"><i class="fas fa-envelope text-gold me-3"></i>Contact Us</h1>
+    <p style="color:rgba(255,255,255,.7);max-width:500px;margin:12px auto 0;">Have questions? Get in touch with the library team.</p>
+  </div>
+</div>
+<section class="contact-section">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-md-5">
+        <h3 class="section-title mb-4">Library Information</h3>
+        <div class="contact-item"><div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div><div><h6>Address</h6><p> 2nd floor near canteen </p></div></div>
+        <div class="contact-item"><div class="contact-icon"><i class="fas fa-phone"></i></div><div><h6>Phone</h6><p>+91 8872202323</p></div></div>
+        <div class="contact-item"><div class="contact-icon"><i class="fas fa-envelope"></i></div><div><h6>Email</h6><p>info@mataguzricollege.org</p></div></div>
+        <div class="contact-item"><div class="contact-icon"><i class="fas fa-clock"></i></div><div><h6>Opening Hours</h6><p>Mon–Fri: 9 AM – 5 PM<br>Saturday: Close<br>Sunday: Closed</p></div></div>
+      </div>
+      <div class="col-md-7">
+        <div class="admin-card p-4">
+          <h4 class="text-navy mb-1">Send a Message</h4>
+          <p class="text-muted mb-4" style="font-size:.88rem;">This form is for demonstration purposes in this college project.</p>
+          <div class="mb-3"><label class="form-label">Full Name</label><input type="text" class="form-control" placeholder="Anmoljot Singh ,Mangat"></div>
+          <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" placeholder="your@email.com"></div>
+          <div class="mb-3"><label class="form-label">Subject</label><input type="text" class="form-control" placeholder="How can we help?"></div>
+          <div class="mb-4"><label class="form-label">Message</label><textarea class="form-control" rows="4" placeholder="Your message…"></textarea></div>
+          <button class="btn btn-navy" onclick="alert('Thank you for your message! (Demo — not sent)')"><i class="fas fa-paper-plane me-2"></i>Send Message</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

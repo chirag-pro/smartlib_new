@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Login — LibraryMS{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-text"><i class="fas fa-book-open me-2 text-gold"></i>Library<span class="text-gold">MS</span></div>
+      <p class="text-muted mt-1" style="font-size:.85rem;">Sign in to your account</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} auto-dismiss">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-user text-muted"></i></span>
+          <input type="text" name="username" class="form-control" placeholder="Enter username" required autofocus>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Password</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-lock text-muted"></i></span>
+          <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+          <button type="button" class="password-toggle"><i class="fas fa-eye"></i></button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-navy w-100 py-2 fs-6">
+        <i class="fas fa-sign-in-alt me-2"></i>Login
+      </button>
+    </form>
+
+    <hr class="my-3">
+    <p class="text-center text-muted" style="font-size:.88rem;">
+      Don't have an account? <a href="{{ url_for('register') }}" class="text-gold fw-semibold">Register here</a>
+    </p>
+
+    <!-- Demo credentials -->
+    
+{% endblock %}

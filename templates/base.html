@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SmartLib — Smart, Simple and Efficient Library Management{% endblock %}</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('index') }}">
+        <i class="fas fa-book-open me-2"></i>MGC<span>LIBRARY</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'books' %}active{% endif %}" href="{{ url_for('books') }}">Books</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="{{ url_for('about') }}">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'contact' %}active{% endif %}" href="{{ url_for('contact') }}">Contact</a>
+          </li>
+
+          {% if current_user %}
+            {% if current_user.role == 'admin' %}
+              <li class="nav-item">
+                <a class="nav-link {% if 'admin' in request.endpoint %}active{% endif %}" href="{{ url_for('admin_dashboard') }}">
+                  <i class="fas fa-tachometer-alt me-1"></i>Admin Panel
+                </a>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">Dashboard</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'my_books' %}active{% endif %}" href="{{ url_for('my_books') }}">My Books</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}" href="{{ url_for('profile') }}">Profile</a>
+              </li>
+            {% endif %}
+            <li class="nav-item ms-lg-2">
+              <a class="nav-link btn-gold rounded-pill px-4" href="{{ url_for('logout') }}">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+              </a>
+            </li>
+          {% else %}
+            <li class="nav-item ms-lg-1">
+              <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+            </li>
+            <li class="nav-item ms-lg-1">
+              <a class="nav-link btn-gold rounded-pill px-4" href="{{ url_for('register') }}">Register</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container mt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show auto-dismiss" role="alert">
+            <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' %}fa-exclamation-circle{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Main Content -->
+  {% block content %}{% endblock %}
+
+  <!-- Footer -->
+  {% block footer %}
+  <footer class="footer">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="footer-brand mb-3"><i class="fas fa-book-open me-2"></i>MGC<span>LIBRARY</span></div>
+          <p style="font-size:.88rem;line-height:1.7;color:rgba(255,255,255,.55);">Smart, Simple and Efficient Library Management. Your gateway to knowledge and learning.</p>
+          <div class="d-flex gap-3 mt-3">
+            <a href="#" class="text-gold fs-5"><i class="fab fa-facebook"></i></a>
+            <a href="#" class="text-gold fs-5"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-gold fs-5"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-4">
+          <h5>Quick Links</h5>
+          <ul class="list-unstyled" style="line-height:2.2;">
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-chevron-right me-1 text-gold" style="font-size:.6rem;"></i>Home</a></li>
+            <li><a href="{{ url_for('books') }}"><i class="fas fa-chevron-right me-1 text-gold" style="font-size:.6rem;"></i>Books</a></li>
+            <li><a href="{{ url_for('about') }}"><i class="fas fa-chevron-right me-1 text-gold" style="font-size:.6rem;"></i>About</a></li>
+            <li><a href="{{ url_for('contact') }}"><i class="fas fa-chevron-right me-1 text-gold" style="font-size:.6rem;"></i>Contact</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-4">
+          <h5>Account</h5>
+          <ul class="list-unstyled" style="line-height:2.2;">
+            <li><a href="{{ url_for('register') }}"><i class="fas fa-chevron-right me-1 text-gold" style="font-size:.6rem;"></i>Register</a></li>
+            <li><a href="{{ url_for('login') }}"><i class="fas fa-chevron-right me-1 text-gold" style="font-size:.6rem;"></i>Login</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4 col-md-4">
+          <h5>Contact Info</h5>
+          <ul class="list-unstyled" style="line-height:2.2;font-size:.88rem;">
+            <li><i class="fas fa-map-marker-alt text-gold me-2"></i>MAin liberary 2nd floor near Canteen</li>
+            <li><i class="fas fa-phone text-gold me-2"></i>+91 7814521023</li>
+            <li><i class="fas fa-envelope text-gold me-2"></i>info@mataguzricollege</li>
+            <li><i class="fas fa-clock text-gold me-2"></i>Mon–Fri: 9 AM – 5 PM</li>
+          </ul>
+        </div>
+      </div>
+      <hr class="footer-divider">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center footer-copy">
+        <span>© {{ now.year }} SMARTLIB. FOR MGC COLLEGE.</span>
+        <span class="mt-2 mt-md-0">Built with <i class="fas fa-heart text-gold mx-1"></i> using Flask & SQLite</span>
+      </div>
+    </div>
+  </footer>
+  {% endblock %}
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Custom JS -->
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/book_covers.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

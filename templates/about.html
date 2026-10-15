@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}About — LibraryMS{% endblock %}
+{% block content %}
+<div style="background:linear-gradient(135deg,var(--navy),var(--navy-light));padding:64px 0 48px;">
+  <div class="container text-center">
+    <h1 style="color:#fff;"><i class="fas fa-info-circle text-gold me-3"></i>About SmartLib</h1>
+    <p style="color:rgba(255,255,255,.7);font-size:1.1rem;max-width:600px;margin:12px auto 0;"> A fully functional Library Management System built with Flask.</p>
+  </div>
+</div>
+<section>
+  <div class="container">
+    <div class="row g-5 align-items-center">
+      <div class="col-lg-6">
+        <span class="section-eyebrow">Our Mission</span>
+        <h2 class="section-title">Empowering Students Through Knowledge</h2>
+        <p class="text-muted" style="line-height:1.8;">SmartLib is a comprehensive Library Management System designed to make library operations efficient, transparent, and accessible for students and faculty alike.</p>
+        <p class="text-muted" style="line-height:1.8;">It demonstrates core concepts of full-stack web development including user authentication, database design, CRUD operations, and role-based access control.</p>
+        <div class="row g-3 mt-3">
+          {% for icon, label in [('fa-book','20+ Books'),('fa-users','Multi-user Roles'),('fa-shield-alt','Secure System'),('fa-chart-bar','Real-time Reports')] %}
+          <div class="col-6">
+            <div style="background:var(--cream);border-radius:8px;padding:14px;display:flex;align-items:center;gap:10px;">
+              <i class="fas {{ icon }} text-gold fs-4"></i>
+              <span class="fw-semibold text-navy" style="font-size:.9rem;">{{ label }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="admin-card p-4">
+          <h4 class="text-navy mb-4">Technology Stack</h4>
+          {% for tech, desc, icon in [
+            ('Flask (Python)','Backend web framework','fa-flask'),
+            ('SQLite','Lightweight database','fa-database'),
+            ('Bootstrap 5','Responsive UI framework','fa-mobile-alt'),
+            ('Chart.js','Interactive data charts','fa-chart-line'),
+            ('Werkzeug','Password hashing & utilities','fa-lock'),
+            ('Jinja2','HTML templating engine','fa-code'),
+          ] %}
+          <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+            <div style="width:42px;height:42px;background:var(--navy);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fas {{ icon }} text-gold"></i>
+            </div>
+            <div>
+              <div class="fw-semibold text-navy" style="font-size:.9rem;">{{ tech }}</div>
+              <div class="text-muted" style="font-size:.8rem;">{{ desc }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

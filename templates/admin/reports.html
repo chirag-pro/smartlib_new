@@ -1,0 +1,151 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Reports — LibraryMS{% endblock %}
+{% block page_title %}Reports{% endblock %}
+
+{% block content %}
+<div class="page-title-block d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <div>
+    <h4><i class="fas fa-chart-bar text-gold me-2"></i>Reports & Analytics</h4>
+    <p>Comprehensive library statistics and insights.</p>
+  </div>
+  <button class="btn btn-outline-navy" onclick="window.print()"><i class="fas fa-print me-2"></i>Print Report</button>
+</div>
+
+<!-- Summary Stats -->
+<div class="row g-3 mb-4">
+  {% for label, val, icon, bg, col in [
+    ('Total Books', stats.total_books, 'fa-book', '#eef2ff', 'var(--navy)'),
+    ('Total Copies', stats.total_copies, 'fa-layer-group', '#dbeafe', '#1d4ed8'),
+    ('Active Issues', stats.active_issues, 'fa-book-reader', '#fef9c3', '#ca8a04'),
+    ('Total Fines', '₹' ~ stats.total_fines, 'fa-rupee-sign', '#fce7f3', '#9d174d'),
+  ] %}
+  <div class="col-6 col-md-3">
+    <div class="dash-stat-card">
+      <div class="dash-stat-icon" style="background:{{ bg }};"><i class="fas {{ icon }}" style="color:{{ col }};"></i></div>
+      <div><div class="dash-stat-num">{{ val }}</div><div class="dash-stat-label">{{ label }}</div></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Charts -->
+<div class="row g-4 mb-4">
+  <div class="col-md-5">
+    <div class="admin-card h-100">
+      <div class="admin-card-header"><h5><i class="fas fa-chart-pie text-gold me-2"></i>Books by Category</h5></div>
+      <div class="admin-card-body">
+        <div class="chart-container" style="height:260px;"><canvas id="catChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="admin-card h-100">
+      <div class="admin-card-header"><h5><i class="fas fa-chart-line text-gold me-2"></i>Monthly Issues vs Returns</h5></div>
+      <div class="admin-card-body">
+        <div class="chart-container" style="height:260px;"><canvas id="monthlyChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Most Borrowed + Active Borrowers Tables -->
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="admin-card">
+      <div class="admin-card-header"><h5><i class="fas fa-trophy text-gold me-2"></i>Most Borrowed Books</h5></div>
+      <div class="admin-card-body p-0">
+        {% if most_borrowed %}
+        <table class="table table-hover mb-0">
+          <thead><tr><th>#</th><th>Book Title</th><th>Times Borrowed</th></tr></thead>
+          <tbody>
+            {% for b in most_borrowed %}
+            <tr>
+              <td class="text-muted">{{ loop.index }}</td>
+              <td class="fw-semibold text-navy" style="font-size:.88rem;">{{ b[0] }}</td>
+              <td><span class="badge rounded-pill" style="background:var(--navy);">{{ b[1] }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state"><i class="fas fa-trophy"></i><h5>No data yet.</h5></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="admin-card">
+      <div class="admin-card-header"><h5><i class="fas fa-star text-gold me-2"></i>Most Active Borrowers</h5></div>
+      <div class="admin-card-body p-0">
+        {% if active_borrowers %}
+        <table class="table table-hover mb-0">
+          <thead><tr><th>#</th><th>Student</th><th>Total Borrows</th></tr></thead>
+          <tbody>
+            {% for u in active_borrowers %}
+            <tr>
+              <td class="text-muted">{{ loop.index }}</td>
+              <td>
+                <div class="fw-semibold text-navy" style="font-size:.88rem;">{{ u[0] }}</div>
+                <div style="font-size:.75rem;color:var(--muted);">@{{ u[1] }}</div>
+              </td>
+              <td><span class="badge rounded-pill" style="background:var(--gold);color:var(--navy);">{{ u[2] }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state"><i class="fas fa-users"></i><h5>No data yet.</h5></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Category Detail Table -->
+<div class="admin-card mb-4">
+  <div class="admin-card-header"><h5><i class="fas fa-list text-gold me-2"></i>Books by Category — Detail</h5></div>
+  <div class="admin-card-body p-0">
+    <table class="table table-hover mb-0">
+      <thead><tr><th>Category</th><th>Number of Titles</th><th>Share</th></tr></thead>
+      <tbody>
+        {% set total = cat_data | sum(attribute=1) %}
+        {% for cat, cnt in cat_data %}
+        <tr>
+          <td><span class="book-category-badge">{{ cat }}</span></td>
+          <td class="fw-semibold">{{ cnt }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="progress flex-grow-1" style="height:6px;border-radius:3px;">
+                <div class="progress-bar" style="width:{{ ((cnt/total)*100)|int }}%;background:var(--navy);"></div>
+              </div>
+              <span style="font-size:.8rem;width:36px;">{{ ((cnt/total)*100)|int }}%</span>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const catLabels = {{ cat_data | map(attribute=0) | list | tojson }};
+const catCounts = {{ cat_data | map(attribute=1) | list | tojson }};
+renderCategoryChart('catChart', catLabels, catCounts);
+
+const issueMonths  = {{ monthly_issues  | map(attribute=0) | list | tojson }};
+const issueCounts  = {{ monthly_issues  | map(attribute=1) | list | tojson }};
+const returnMonths = {{ monthly_returns | map(attribute=0) | list | tojson }};
+const returnCounts = {{ monthly_returns | map(attribute=1) | list | tojson }};
+const allMonths = [...new Set([...issueMonths, ...returnMonths])].sort();
+const issueData  = allMonths.map(m => { const i = issueMonths.indexOf(m);  return i >= 0 ? issueCounts[i]  : 0; });
+const returnData = allMonths.map(m => { const i = returnMonths.indexOf(m); return i >= 0 ? returnCounts[i] : 0; });
+renderLineChart('monthlyChart', allMonths, [
+  { label: 'Issues',  data: issueData  },
+  { label: 'Returns', data: returnData }
+]);
+</script>
+{% endblock %}

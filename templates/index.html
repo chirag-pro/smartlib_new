@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% block title %}LibraryMS — Discover Your Next Great Read{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ──────────────────────────────────────────────────── -->
+<section class="hero-section">
+  <div class="container position-relative z-1">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <span class="hero-badge"><i class="fas fa-star me-2"></i>Welcome to SmartLib</span>
+        <h1 class="hero-title">Discover Your Next <span class="accent">Great Read</span></h1>
+        <p class="hero-sub">Reserve books from home, pick them up at the library, read at your own pace —
+and track everything online. No paperwork. No queues. No confusion.</p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="{{ url_for('books') }}" class="btn-hero-primary">
+            <i class="fas fa-book-open"></i> Visit Library
+          </a>
+          {% if not current_user %}
+          <a href="{{ url_for('login') }}" class="btn-hero-outline">
+            <i class="fas fa-sign-in-alt me-1"></i> Login
+          </a>
+          {% else %}
+          <a href="{{ url_for('dashboard') if current_user.role == 'student' else url_for('admin_dashboard') }}" class="btn-hero-outline">
+            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+          </a>
+          {% endif %}
+        </div>
+        <div class="hero-stats d-flex flex-wrap gap-4">
+          <div class="hero-stat-item">
+            <div class="hero-stat-num">{{ stats.total_books }}+</div>
+            <div class="hero-stat-label">Books Available</div>
+          </div>
+          <div class="hero-stat-item">
+            <div class="hero-stat-num">{{ stats.users }}+</div>
+            <div class="hero-stat-label">Registered Members</div>
+          </div>
+          <div class="hero-stat-item">
+            <div class="hero-stat-num">{{ stats.returned }}+</div>
+            <div class="hero-stat-label">Books Issued</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stats Strip ────────────────────────────────────────────── -->
+<section style="padding:48px 0;background:var(--cream);">
+  <div class="container">
+    <div class="row g-4 text-center">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="icon" style="background:#eef2ff;"><i class="fas fa-book-open" style="font-size:1.3rem; color:#6366f1;"></i></div>
+          <div class="num">{{ stats.total_books }}</div>
+          <div class="label">Total Books</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="icon" style="background:#d1fae5;"><i class="fas fa-check-circle" style="color:#059669;font-size:1.3rem;"></i></div>
+          <div class="num">{{ stats.available }}</div>
+          <div class="label">Available Copies</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="icon" style="background:#fef3c7;"><i class="fas fa-users" style="color:#d97706;font-size:1.3rem;"></i></div>
+          <div class="num">{{ stats.users }}</div>
+          <div class="label">Registered Members</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="icon" style="background:#fee2e2;"><i class="fas fa-exchange-alt" style="color:#dc2626;font-size:1.3rem;"></i></div>
+          <div class="num">{{ stats.active_issues }}</div>
+          <div class="label">Books Issued</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── About ──────────────────────────────────────────────────── -->
+<section class="about-strip">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="section-eyebrow">About Our Library</span>
+        <h2 class="mb-4" style="color:#fff;">A Place Where Knowledge Meets Technology</h2>
+        <p style="color:rgba(255,255,255,.75);line-height:1.8;">Our Library Management System bridges the gap between traditional libraries and modern digital convenience. We provide students and faculty with seamless access to a vast collection of books across all major computer science disciplines.</p>
+        <p style="color:rgba(255,255,255,.75);line-height:1.8;">With easy registration, quick borrowing, smart search, and automated fine calculation, managing your reading has never been simpler.</p>
+        <a href="{{ url_for('books') }}" class="btn btn-gold mt-2">Explore Collection <i class="fas fa-arrow-right ms-2"></i></a>
+      </div>
+      <div class="col-lg-6">
+        <div class="row g-3">
+          {% set features = [
+            ('fa-search','Easy Search','Find any book instantly by title, author, or category.'),
+            ('fa-bolt','Fast Borrowing','Borrow books online in seconds without paperwork.'),
+            ('fa-chart-line','Book Tracking','Track your borrowing history and due dates easily.'),
+            ('fa-shield-alt','Secure Account','Your account and data are always safe with us.')
+          ] %}
+          {% for icon, title, desc in features %}
+          <div class="col-6">
+            <div style="background:rgba(255,255,255,.07);border-radius:10px;padding:20px;border:1px solid rgba(255,255,255,.1);">
+              <i class="fas {{ icon }} text-gold fs-4 mb-2"></i>
+              <h6 style="color:#fff;margin-bottom:6px;">{{ title }}</h6>
+              <p style="color:rgba(255,255,255,.55);font-size:.82rem;margin:0;">{{ desc }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Featured Books ─────────────────────────────────────────── -->
+<section style="background:#fff; padding:60px 0;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="section-eyebrow">Library Collection</span>
+      <h2 class="section-title">Featured Books</h2>
+      <p class="section-subtitle">A snapshot of our most popular titles across disciplines.</p>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-4">
+      {% for book in featured %}
+      <div class="col-sm-6 col-md-4 col-xl-4">
+        <div class="book-card h-100">
+          <img class="book-cover-auto"
+               data-title="{{ book['title'] }}"
+               data-author="{{ book['author'] }}"
+               data-isbn="{{ book['isbn'] or '' }}"
+               data-cover="{{ book['cover_image'] or '' }}"
+               src=""
+               alt="{{ book['title'] }}"
+               style="display:none;width:100%;height:220px;object-fit:contain;background:#f6f7fb;border-radius:8px 8px 0 0;">
+          <div class="book-cover-placeholder">
+            <i class="fas fa-book"></i>
+            <span class="book-title-overlay">{{ book['title'] }}</span>
+          </div>
+          <div class="book-card-body">
+            <span class="book-category-badge">{{ book['category'] }}</span>
+            <div class="book-title">{{ book['title'] }}</div>
+            <div class="book-author"><i class="fas fa-user me-1"></i>{{ book['author'] }}</div>
+            <div class="book-desc">{{ book['description'] or 'A great addition to our library collection.' }}</div>
+            <div class="d-flex align-items-center justify-content-between mt-auto">
+              {% if book['available_quantity'] > 0 %}
+              <span class="availability-badge badge-available"><i class="fas fa-check me-1"></i>Available</span>
+              {% else %}
+              <span class="availability-badge badge-unavailable"><i class="fas fa-times me-1"></i>Out of Stock</span>
+              {% endif %}
+              <a href="{{ url_for('book_details', book_id=book['id']) }}" class="btn btn-sm btn-navy">View Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-5">
+      <a href="{{ url_for('books') }}" class="btn btn-navy" style="padding:12px 36px;border-radius:8px;font-weight:600;">
+        <i class="fas fa-book-open me-2"></i>View All Books
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── How It Works ───────────────────────────────────────────── -->
+<section style="background:var(--cream); padding:60px 0;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="section-eyebrow">Simple Process</span>
+      <h2 class="section-title">How It Works</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-4 position-relative">
+      {% set steps = [
+        ('1','fa-user-plus','Register','Create your free student account in under a minute.'),
+        ('2','fa-search','Browse Books','Search our full collection by title, author, or category.'),
+        ('3','fa-hand-holding-heart','Borrow','Request a book and get a 14-day borrowing window.'),
+        ('4','fa-undo','Return','Return the book on time to avoid daily fines.')
+      ] %}
+      {% for num, icon, title, desc in steps %}
+      <div class="col-sm-6 col-lg-3">
+        <div class="step-card position-relative">
+          <div class="step-num">{{ num }}</div>
+          <i class="fas {{ icon }} text-gold fs-3 mb-3 d-block"></i>
+          <h5>{{ title }}</h5>
+          <p>{{ desc }}</p>
+          {% if not loop.last %}
+          <div class="step-connector d-none d-lg-block"></div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Contact Strip ──────────────────────────────────────────── -->
+<section class="contact-section">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="section-eyebrow">Get In Touch</span>
+      <h2 class="section-title">Contact & Hours</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-5">
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div>
+            <h6>Address</h6>
+            <p>MAIN Library, Top Floor Canteen</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-phone"></i></div>
+          <div>
+            <h6>Phone</h6>
+            <p>+91 7814521023</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+          <div>
+            <h6>Email</h6>
+            <p>info@mataguzricollege.org</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-clock"></i></div>
+          <div>
+            <h6>Opening Hours</h6>
+            <p>
+              Monday – Friday: 9:00 AM – 5:00 PM<br>
+              Saturday: Frequently open<br>
+              Sunday: Closed
+            </p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon"><i class="fas fa-info-circle"></i></div>
+          <div>
+            <h6>About This Project</h6>
+            <p>A project demonstrating a full-stack Library Management System built with Flask, SQLite, and Bootstrap 5.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

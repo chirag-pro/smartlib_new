@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}404 — Page Not Found{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="error-page">
+  <div class="container text-center" style="color:#fff;">
+    <div class="error-code">404</div>
+    <h2 style="color:rgba(255,255,255,.9);margin-bottom:12px;">Page Not Found</h2>
+    <p style="color:rgba(255,255,255,.6);max-width:400px;margin:0 auto 32px;">The page you are looking for doesn't exist or has been moved.</p>
+    <a href="{{ url_for('index') }}" class="btn-gold" style="padding:12px 32px;border-radius:8px;font-weight:700;display:inline-block;">
+      <i class="fas fa-home me-2"></i>Back to Home
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Admin Dashboard — LibraryMS{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-title-block">
+  <h4><i class="fas fa-tachometer-alt text-gold me-2"></i>Admin Dashboard</h4>
+  <p>Overview of all library operations</p>
+</div>
+
+<!-- Stats Row 1 -->
+<div class="row g-3 mb-4">
+  {% set cards = [
+    ('fa-book','Total Books',stats.total_books,'#eef2ff','var(--navy)'),
+    ('fa-layer-group','Total Copies',stats.total_copies,'#dbeafe','#1d4ed8'),
+    ('fa-check-circle','Available Copies',stats.available,'#d1fae5','#059669'),
+    ('fa-users','Registered Users',stats.users,'#fef3c7','#d97706'),
+  ] %}
+  {% for icon, label, val, bg, col in cards %}
+  <div class="col-6 col-md-3">
+    <div class="dash-stat-card">
+      <div class="dash-stat-icon" style="background:{{ bg }};"><i class="fas {{ icon }}" style="color:{{ col }};"></i></div>
+      <div>
+        <div class="dash-stat-num">{{ val }}</div>
+        <div class="dash-stat-label">{{ label }}</div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Stats Row 2 -->
+<div class="row g-3 mb-4">
+  {% set cards2 = [
+    ('fa-book-reader','Active Issues',stats.active_issues,'#fef9c3','#ca8a04'),
+    ('fa-undo','Returned Books',stats.returned,'#d1fae5','#059669'),
+    ('fa-exclamation-triangle','Overdue Books',stats.overdue,'#fee2e2','#dc2626'),
+    ('fa-rupee-sign','Total Fines (₹)',stats.total_fines,'#fce7f3','#9d174d'),
+  ] %}
+  {% for icon, label, val, bg, col in cards2 %}
+  <div class="col-6 col-md-3">
+    <div class="dash-stat-card">
+      <div class="dash-stat-icon" style="background:{{ bg }};"><i class="fas {{ icon }}" style="color:{{ col }};"></i></div>
+      <div>
+        <div class="dash-stat-num">{% if 'Fine' in label %}₹{% endif %}{{ val }}</div>
+        <div class="dash-stat-label">{{ label }}</div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Charts Row 1 -->
+<div class="row g-4 mb-4">
+  <div class="col-md-5">
+    <div class="admin-card h-100">
+      <div class="admin-card-header"><h5><i class="fas fa-chart-pie text-gold me-2"></i>Books by Category</h5></div>
+      <div class="admin-card-body">
+        <div class="chart-container" style="height:260px;">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="admin-card h-100">
+      <div class="admin-card-header"><h5><i class="fas fa-chart-line text-gold me-2"></i>Monthly Activity</h5></div>
+      <div class="admin-card-body">
+        <div class="chart-container" style="height:260px;">
+          <canvas id="activityChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="row g-4 mb-4">
+  <div class="col-md-7">
+    <div class="admin-card h-100">
+      <div class="admin-card-header"><h5><i class="fas fa-trophy text-gold me-2"></i>Most Borrowed Books</h5></div>
+      <div class="admin-card-body">
+        <div class="chart-container" style="height:240px;">
+          <canvas id="borrowedChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="admin-card h-100">
+      <div class="admin-card-header"><h5><i class="fas fa-user-plus text-gold me-2"></i>User Registrations</h5></div>
+      <div class="admin-card-body">
+        <div class="chart-container" style="height:240px;">
+          <canvas id="regChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="admin-card">
+  <div class="admin-card-header"><h5><i class="fas fa-bolt text-gold me-2"></i>Quick Actions</h5></div>
+  <div class="admin-card-body">
+    <div class="d-flex flex-wrap gap-3">
+      <a href="{{ url_for('admin_add_book') }}" class="btn btn-navy"><i class="fas fa-plus me-2"></i>Add Book</a>
+      <a href="{{ url_for('admin_issued') }}" class="btn btn-outline-navy"><i class="fas fa-book-reader me-2"></i>View Issued</a>
+      <a href="{{ url_for('admin_overdue') }}" class="btn btn-outline-navy"><i class="fas fa-exclamation-triangle me-2"></i>View Overdue</a>
+      <a href="{{ url_for('admin_users') }}" class="btn btn-outline-navy"><i class="fas fa-users me-2"></i>Manage Users</a>
+      <a href="{{ url_for('admin_reports') }}" class="btn btn-outline-navy"><i class="fas fa-chart-bar me-2"></i>Reports</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const catLabels = {{ cat_data | map(attribute=0) | list | tojson }};
+const catCounts = {{ cat_data | map(attribute=1) | list | tojson }};
+renderCategoryChart('categoryChart', catLabels, catCounts);
+
+const issueMonths  = {{ monthly_issues  | map(attribute=0) | list | tojson }};
+const issueCounts  = {{ monthly_issues  | map(attribute=1) | list | tojson }};
+const returnMonths = {{ monthly_returns | map(attribute=0) | list | tojson }};
+const returnCounts = {{ monthly_returns | map(attribute=1) | list | tojson }};
+const allMonths = [...new Set([...issueMonths, ...returnMonths])].sort();
+const issueData  = allMonths.map(m => { const i = issueMonths.indexOf(m); return i>=0 ? issueCounts[i] : 0; });
+const returnData = allMonths.map(m => { const i = returnMonths.indexOf(m); return i>=0 ? returnCounts[i] : 0; });
+renderLineChart('activityChart', allMonths, [
+  { label: 'Issues', data: issueData },
+  { label: 'Returns', data: returnData }
+]);
+
+const bkLabels = {{ most_borrowed | map(attribute=0) | list | tojson }};
+const bkCounts = {{ most_borrowed | map(attribute=1) | list | tojson }};
+renderBarChart('borrowedChart', bkLabels, bkCounts, 'Times Borrowed');
+
+const regMonths = {{ user_regs | map(attribute=0) | list | tojson }};
+const regCounts = {{ user_regs | map(attribute=1) | list | tojson }};
+renderLineChart('regChart', regMonths, [{ label: 'Registrations', data: regCounts }]);
+</script>
+{% endblock %}

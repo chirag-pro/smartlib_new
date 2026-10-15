@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}My Books — LibraryMS{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div class="container">
+    <h2><i class="fas fa-books text-gold me-2"></i>My Books</h2>
+    <p>Manage your borrowed books and view your reading history.</p>
+  </div>
+</div>
+
+<div style="background:#f3f4f6;min-height:calc(100vh-200px);padding:32px 0;">
+  <div class="container">
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4 bg-white rounded-top" id="myBooksTab">
+      <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#currentTab">
+          <i class="fas fa-book-open me-2"></i>Currently Borrowed
+          {% if issued %}<span class="badge bg-danger ms-1 rounded-pill" style="font-size:.65rem;">{{ issued|length }}</span>{% endif %}
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#historyTab">
+          <i class="fas fa-history me-2"></i>Return History
+          {% if returned %}<span class="badge" style="background:var(--navy);font-size:.65rem;" class="ms-1 rounded-pill">{{ returned|length }}</span>{% endif %}
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Currently Borrowed -->
+      <div class="tab-pane fade show active" id="currentTab">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h5>Active Borrows ({{ issued|length }} / 3 maximum)</h5>
+            <a href="{{ url_for('books') }}" class="btn btn-sm btn-gold">Borrow More</a>
+          </div>
+          <div class="admin-card-body p-0">
+            {% if issued %}
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Book Details</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Current Fine</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for b in issued %}
+                  {% set fine_amt = calculate_fine(b['due_date']) %}
+                  <tr {% if b['due_date'] < today %}class="overdue-row"{% endif %}>
+                    <td>
+                      <div class="fw-semibold text-navy">{{ b['title'] }}</div>
+                      <div style="font-size:.77rem;color:var(--muted);">{{ b['author'] }} &bull; {{ b['category'] }}</div>
+                    </td>
+                    <td>{{ b['issue_date'] }}</td>
+                    <td data-due-date="{{ b['due_date'] }}">
+                      <div>{{ b['due_date'] }}</div>
+                      {% if b['due_date'] < today %}
+                      <span class="availability-badge badge-unavailable" style="font-size:.65rem;">OVERDUE</span>
+                      {% else %}
+                      <span class="availability-badge badge-available" style="font-size:.65rem;">ON TIME</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if fine_amt > 0 %}
+                      <span class="fw-semibold text-danger">₹{{ fine_amt }}</span>
+                      <div style="font-size:.72rem;color:var(--muted);">₹5/day late</div>
+                      {% else %}
+                      <span class="text-success fw-semibold">₹0</span>
+                      {% endif %}
+                    </td>
+                    <td><span class="badge rounded-pill" style="background:var(--navy);padding:5px 12px;">{{ b['status'] }}</span></td>
+                    <td>
+                      <form action="{{ url_for('return_book_route', issue_id=b['id']) }}" method="POST" class="confirm-return">
+                        <button type="submit" class="btn btn-sm btn-gold">
+                          <i class="fas fa-undo me-1"></i>Return
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+              <i class="fas fa-book-open"></i>
+              <h5>No Active Borrows</h5>
+              <p>You haven't borrowed any books yet.</p>
+              <a href="{{ url_for('books') }}" class="btn btn-gold mt-2">Browse Books</a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Return History -->
+      <div class="tab-pane fade" id="historyTab">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h5>Complete Return History ({{ returned|length }} books)</h5>
+          </div>
+          <div class="admin-card-body p-0">
+            {% if returned %}
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Book</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Return Date</th>
+                    <th>Fine Paid</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for b in returned %}
+                  <tr>
+                    <td>
+                      <div class="fw-semibold text-navy">{{ b['title'] }}</div>
+                      <div style="font-size:.77rem;color:var(--muted);">{{ b['author'] }}</div>
+                    </td>
+                    <td>{{ b['issue_date'] }}</td>
+                    <td>{{ b['due_date'] }}</td>
+                    <td>{{ b['return_date'] }}</td>
+                    <td>
+                      {% if b['fine'] > 0 %}
+                      <span class="text-danger fw-semibold">₹{{ b['fine'] }}</span>
+                      {% else %}
+                      <span class="text-success">₹0</span>
+                      {% endif %}
+                    </td>
+                    <td><span class="availability-badge badge-available">Returned</span></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+              <i class="fas fa-history"></i>
+              <h5>No Return History</h5>
+              <p>Books you return will appear here.</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

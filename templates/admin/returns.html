@@ -1,0 +1,66 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Returns — LibraryMS{% endblock %}
+{% block page_title %}Returns{% endblock %}
+
+{% block content %}
+<div class="page-title-block">
+  <h4><i class="fas fa-undo text-gold me-2"></i>Return History</h4>
+  <p>All books that have been returned by students.</p>
+</div>
+
+<div class="admin-card">
+  <div class="admin-card-header">
+    <h5>Returned Books ({{ issues|length }})</h5>
+  </div>
+  <div class="admin-card-body p-0">
+    {% if issues %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Book</th>
+            <th>Issue Date</th>
+            <th>Due Date</th>
+            <th>Return Date</th>
+            <th>Days Late</th>
+            <th>Fine Charged</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in issues %}
+          {% set days_late = [(i['return_date'][:10] | string > i['due_date'] | string) | int * ((i['return_date'][:10] | string | length) - (i['due_date'] | string | length)), 0] | max %}
+          <tr>
+            <td>
+              <div class="fw-semibold text-navy" style="font-size:.88rem;">{{ i['full_name'] }}</div>
+              <div style="font-size:.75rem;color:var(--muted);">@{{ i['username'] }}</div>
+            </td>
+            <td style="font-size:.85rem;">{{ i['book_title'] }}</td>
+            <td style="font-size:.82rem;">{{ i['issue_date'] }}</td>
+            <td style="font-size:.82rem;">{{ i['due_date'] }}</td>
+            <td style="font-size:.82rem;">{{ i['return_date'] }}</td>
+            <td>
+              {% if i['fine'] > 0 %}
+              <span class="text-danger fw-semibold">{{ (i['fine'] / 5) | int }} days</span>
+              {% else %}
+              <span class="text-success">On time</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if i['fine'] > 0 %}
+              <span class="text-danger fw-semibold">₹{{ i['fine'] }}</span>
+              {% else %}
+              <span class="text-success">₹0</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><i class="fas fa-undo"></i><h5>No returns yet.</h5></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
